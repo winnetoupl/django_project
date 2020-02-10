@@ -1,4 +1,11 @@
 from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import (
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView
+)
 from .models import Post
 
 
@@ -8,6 +15,29 @@ def home(request):
     }
     return render(request, 'blog/home.html', context)
 
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/home.html'
+    context_object_name = 'posts'
+
+    """ odwrocona kolejnosc wyswietlania """
+    ordering = ['-date_posted']
+
+class PostDetailView(DetailView):
+    model = Post
+
+""" dodanie posta dopiero po zalogowaniu - dokonczone"""
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    fields = ['title', 'content']
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        """ wywolanie na klasie parent """
+        return super().form_valid(form)
 
 def about(request):
     return render(request, 'blog/about.html', {'title': 'About'})
+
+
+""" DOKONCZ PostUpdateView i reszte """
